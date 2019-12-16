@@ -1,0 +1,483 @@
+my_vector <- c(2.5, -1.2, -8.4, 9.6, 0.7, -2.4, 1.9)
+Sabrina <- c(2.5, -1.2, -8.4, 9.6, 0.7, -2.4, 1.9)
+mean(Sabrina)
+Sabrina[Sabrina < 0]
+Strausser <- c(-1.2, -8.4, -2.4)
+Strausser ^2
+sum(Strausser ^2)
+library(readxl)
+Handout2_CO2_csv <- read_excel("Downloads/Handout2_CO2.csv.xls")
+View(Handout2_CO2_csv)
+Handout2_CO2.csv <- read.csv("~/Downloads/Handout2_CO2.csv.xls")
+View(Handout2_CO2.csv)
+View(Handout2_CO2.csv)
+mydata <- read.csv("~/Downloads/Handout2_CO2.csv.xls")
+View(mydata)
+chilledB <- mydata[mydata$plant_type == "B" & mydata$treatment == chilled]
+chilledB <- mydata[mydata$plant_type == "B" & mydata$treatment == "chilled"]
+chilledB <- mydata[mydata$plant_type == "B" & mydata$treatment == "chilled", ]
+B40 <- mydata[mydata$plant_type == "B" & mydata$uptake > 40, ]
+UptakeB <- mydata$uptake[mydata$plant_type=='B']
+mean(UptakeB)
+Lab2biomass <- read.csv("~/Downloads/Lab2_biomass.csv.xls")
+View(Lab2biomass)
+Ipeti <- Lab2biomass[Lab2biomass$Area=="Ipeti", ]
+Maje <- Lab2biomass[Lab2biomass$Area=="Maje", ]
+mean(Ipeti$AGB)
+sd(Ipeti$AGB)
+mean(Maje$AGB)
+sd(Maje$AGB)
+sas6824 <- c(36.2,34.0,34.8,39.6,37.7,33.1,34.9,37.0,32.8,36.7)
+mean(sas6824)
+sd(sas6824)
+sas6824[sas6824 > 37]
+HW3 <- read.csv("~/Downloads/Handout3_rowan.csv.xls")
+View(HW3)
+nesting <- HW3[HW3$nesting=="nesting", ]
+nesting <- HW3[HW3$nesting=="y", ]
+fivenum(HW3$leaf.len)
+fivenum(nesting$leaf.len)
+mydata <- read.csv("~/Downloads/Lab3_acupuncture.csv.xls", header=FALSE)
+View(mydata)
+table(mydata$V10)
+data('trees')
+sas6824 <- trees
+View(trees)
+View(trees)
+mean(sas6824$Height)
+fivenum(sas6824$Height)
+IQR(sas6824$Height)
+short <- sas6824(sas6824$Height < 76)
+short <- sas6824(sas6824$Height < 76,)
+short <- sas6824(sas6824$Height < 76, )
+short <- sas6824[sas6824$Height < 76, ]
+fivenum(short$Girth, na.rm = TRUE)
+IQR(short$Girth)
+genes.csv <- read.csv("~/Desktop/Handout4_genes.csv.xls", sep="")
+View(genes.csv)
+mysample <- sample(genes.csv$nucleotides, size = 150)
+sd(mysample)
+mymeans <- numeric(0)
+for (i in 1:1000) {x <- sample(genes.csv$nucleotides, size = 150) mymeans <- c(mymeans, mean(x))}
+for(i in 1:1000) {x <- sample(genes.csv$nucleotides, size = 150) mymeans <- c(mymeans, mean(x))}
+genes <- read.csv("~/Desktop/Handout4_genes.csv.xls", sep="")
+View(genes)
+sample(genes$nucleotides,size = 150)
+myxbar <- rep(NA,1000)
+for (i in 1:1000) {
+mysamp <- sample(genes$nucleotides,size=150)
+}
+myxbar <- rep(NA,1000)for (i in 1:1000) {
+mysamp <- sample(genes$nucleotides,size=150)
+genes <- read.csv("~/Desktop/Handout4_genes.csv.xls", sep="")
+View(genes)
+mean(genes$nucleotides)
+sd(genes$nucleotides)
+hist(genes$nucleotides)
+sample(genes$nucleotides,size = 150)
+myxbar <- rep(NA,1000)
+for (i in 1:1000) {
+mysamp <- sample(genes$nucleotides,size = 150)
+myxbar[i] <- mean(mysamp)
+}
+hist(myxbar)
+mean(myxbar)
+sd(myxbar)
+sd(genes$nucleotides)/sqrt(150)
+mean(genes$nucleotides)
+mydata <- read.csv("~/Desktop/Lab4_population_data.csv.xls", header=FALSE)
+View(mydata)
+mymeans <- numeric(0)
+for (i in 1:1000) {
+x <- sample(genes$nucleotides, size = 20)
+mymeans <- c(mymeans, mean(x))
+}
+for (i in 1:1000) {
+x <- sample(mydata$V5, size = 20)
+mymeans <- c(mymeans, mean(x))
+}
+data('swiss')
+sas6824 <- swiss
+hist(sas6824$Education, main= 'Education in 1888 Switzerland', xlab= 'Percent Education', right = F, col = "grey")
+hist(sas6824$Education, main= 'Education in 1888 Switzerland', xlab= 'Percent Educated Individuals', right = F, col = "grey")
+mean(sas6824$Education)
+sd(sas6824$Education)
+median(sas6824$Education)
+fivenum(sas6824$Education)
+hist(swiss$Agriculture, main = 'Presence of Farmers', xlab = 'Percentage of Farmers', right = F, col = "blue")
+sas6824$Agriculture[sas6824$Agriculture > 50] <- 'More than Half'
+sas6824$Agriculture[sas6824$Agriculture < 50] <- 'Less than Half'
+table <- table(sas6824$Education, sas6824$Agriculture)
+hist(table)
+boxplot(sas6824$Education ~ sas6824$Agriculture)
+milk <- read.csv("~/Downloads/Handout5_milk.csv.xls")
+View(milk)
+qqnorm(milk)
+qqnorm("grass")
+qqnorm(grass)
+qqnorm(milk$Protein,main = 'Protein Content of Milk')
+qqline(milk$protein,col='red')
+qqline(milk$protein,col  = 'red')
+qqline(milk$protein)
+qqline(milk$Protein,col='red')
+barley_cow <- milk$Protein[milk$Diet == "barley"]
+qqnorm(barley_cow, main = "QQ-plot for Protein Content of Barley Diet")
+qqline(barley_cow, col = "red")
+t.test(barley_cow, mu = 3.3)
+grass_cow <- milk$Protein[milk$Diet == "grass"]
+qqnorm(grass_cow, main = "QQ-plot for Protein Content of grass Diet")
+qqline(grass_cow, col = "red")
+t.test(grass_cow, mu = 3.3)
+health <- read.csv("~/Desktop/Lab5_health.csv.xls")
+View(health)
+albumin <- health$Albumin
+qqnorm(albumin, main = "QQ-plot for Albumin")
+qqline(albumin, col = "red")
+t.test(albumin, mu = 3.4)
+maze <- read.csv("~/Desktop/Handout6_maze.csv.xls", header=FALSE)
+View(maze)
+mydiffs <- maze$Trial1.Time - maze$Trial2.Time
+qqnorm(mydiffs, main = "QQ-Plot of Differences"
+qqline(mydiffs, col = "red"
+qqnorm(mydiffs, main = "QQ-Plot of Differences")
+qqnorm(mydiffs, main = "QQ-Plot of Differences")
+t.test(maze$Trial1.Time, maze$Trial2.Time, paired = T, alternative = "greater")
+t.test(maze$V3, maze$V4, paired = T, alternative = "greater")
+mydiffs <- maze$V3 - maze$V4
+mydiffs <- (maze$V3 - maze$V4)
+mydiffs <- (maze$V3-maze$V4)
+maze <- read.csv("~/Desktop/Handout6_maze.csv.xls", header=FALSE)
+View(maze)
+summary(maze)
+mydiffs <- maze$V3 - maze$V4
+mydiffs <- maze$Trial1.Time - maze$Trial2.Time
+qqnorm(mydiffs, main = "QQ-Plot of Differences")
+qqnorm(mydiffs, main = "QQ-Plot of Differences")
+qqline(mydiffs, col = "red")
+t.test(maze$Trial1.Time, maze$Trial2.Time, paired = T, alternative = "greater")
+odor_trial2 <- maze$Trial2.Time[maze$Group =="odor"]
+maze <- read.csv("Handout6_maze.csv")
+mydiffs <- maze$Trial1.Time - maze$Trial2.Time
+maze <- read.csv("~/Desktop/Handout6_maze.csv.xls", header=FALSE)
+View(maze)
+odor_trial2 <- maze$Trial2.Time[maze$Group =="odor"]
+mean(odor_trial2)
+t.test(maze$Trial1.Time, maze$Trial2.Time, paired = T, alternative = "greater")
+t.test(maze$Trial1.Time, paired = T, alternative = "greater")
+control_trial2 <- maze$Trial2.Time[maze$Group =="control"]
+mean(control_trial2)
+odor_trial2 <- maze$V4[maze$Group =="odor"]
+control_trial2 <- maze$V4[maze$Group =="control"]
+mean(odor_trial2)
+t.test(V4~Group,data=maze, var.equal = T)
+data('faithful')
+sas6824 <- faithful
+View(faithful)
+View(sas6824)
+hist(sas6824$eruptions, xlab = "Duration of Eruptions (min)", main = "Distribution of the Duration of Old Faithful Eruptions", right = FALSE, col = "blue")
+mean(sas6824$eruptions)
+sd(sas6824$eruptions)
+mymeans <- numeric(0)
+for (i in 1:5000) {
+x <- sample(sas6824$eruptions, size = 25)
+mymeans <- c(mymeans, mean(x))
+}
+hist(mymeans, main = "Sampling Distribution for n=25", xlab = "Mean Duration of Eruptions (min)", right = F, col = "grey")
+mean(mymeans)
+sd(mymeans)
+data('morley')
+sas6824 <- morley
+View(sas6824)
+Expt4 <-
+Expt4 <- Expt4
+Expt4 <- sas6824$Expt
+Expt4 <- sas6824$Expt =  4
+Expt4 <-
+data('morley')
+sas6824 <- morley
+Expt4 <-
+qqnorm(sas6824, main = "QQ Plot for Speed of Light for Experiment 4")
+qqnorm(sas6824, main = "QQ Plot for Speed of Light for Experiment 4")
+qqline(sas6824, col = 'red')
+> data('morley')
+> sas6824 <- morley
+> Expt4 <-
+t.test(sas6824, mu = 299792)
+View(sas6824)
+t.test(sas6824, mu = 792)
+leprpsy <- read.csv("Handout8_leprosy.csv")
+leprosy <- read.csv("Handout8_leprosy.csv")
+leprosy <- read.csv("~/Desktop/Handout8_leprosy.csv.xls", header=FALSE)
+View(leprosy)
+sum(is.na(Central_Region) == 0)
+C_cases <- leprosy$V6[leprosy$V4 == "Central"]
+E_cases <- leprosy$V6[leprosy$V4 == "Eastern"]
+sum(is.na(C_cases) == 0)
+sum(is.na(E_cases) == 0)
+wilcox.test(C_cases, E_cases)
+median(C_cases)
+fivenum(C_cases)
+wilcox.test(E_cases, C_cases)
+wilcox.test(E_cases,C_cases)
+wilcox.test(Central, Eastern)
+length(C_cases)
+length(E_cases)
+leprosy <- read.csv("~/Desktop/Handout8_leprosy.csv.xls", header=FALSE)
+View(leprosy)
+C_cases <- leprosy$CasesPer100K[leprosy$Region == "Central"]
+E_cases <- leprosy$CasesPer100K[leprosy$Region == "Eastern"]
+sum(is.na(C_cases) == 0)
+sum(is.na(E_cases) == 0)
+wilcox.test(C_cases, E_cases)
+C_cases <- leprosy$CasesPer100K[leprosy$Region == 'Central']
+E_cases <- leprosy$CasesPer100K[leprosy$Region == 'Eastern']
+C_cases <- leprosy$CasesPer100K[leprosy$Region==Central'']
+E_cases <- leprosy$CasesPer100K[leprosy$Region == "Eastern"]
+leprosy <- read.csv("~/Desktop/Handout8_leprosy.csv.xls", header=FALSE)
+View(leprosy)
+> C_cases <- leprosy$CasesPer100K[leprosy$Region=='Central']
+> C_cases <- leprosy$CasesPer100K[leprosy$Region == 'Central']
+> C_cases <- leprosy$CasesPer100K[leprosy$Region=="Central"]
+> C_cases <- leprosy$CasesPer100K[leprosy$Region == "Central"]
+C_cases <- leprosy$CasesPer100K[leprosy$Region=='Central']
+C_cases <- leprosy$V6[leprosy$V4=='Central']
+E_cases <- leprosy$V6[leprosy$V4=='Eastern']
+length(C_cases)
+length(E_cases)
+wilcox.test(C_cases,E_cases)
+sum(is.na(C_cases) == 0)
+sum(is.na(E_cases) == 0)
+wilcox.test(C_cases,E_cases)
+summary(leprosy)
+fivenum(C_cases)
+library(car)
+data("car")
+install.packages("car")
+library(car)
+data("car")
+librray(cars)
+library(car)
+sas6824 <- cowles
+data("car")
+sas6824 <- Cowles
+sex <- table(sas6824$volunteer, sas6824$sex)
+barplot(sex, beside=T, legend = T, main= "Volunteer Rate of Sexes", xlab= "sex", ylab= "frequency", ylim = c(0, 500))
+table <- table(sas6824$volunteer, sas6824$sex)
+table
+chisq.test(table)$expected
+H0: there is a difference between sexes and frequency of volunteering
+chisq.test(table)
+prop.table(table,2)
+lab9 <- read.csv("~/Downloads/Handout9_bodyfat.csv.xls")
+View(lab9)
+cor(lab9$Height, lab9$Percent)
+data('Friendly')
+library(car)
+daat('Friendly')
+data('Friendly')
+sas6824 <- Friendly
+View(Friendly)
+View(sas6824)
+SFR_cases <- sas6824$correct[sas6824$condition == "SFR"]
+Before_cases <- sas6824$correct[sas6824$condition == "Before"]
+sum(is.na(SFR_cases) == 0)
+sum(is.na(Before_cases) == 0)
+wilcox.test(SFR_cases, Before_cases)
+library(readxl)
+SDS <- read_excel("Library/Mobile Documents/com~apple~Numbers/Documents/SDS Project-Raw Data.xlsx")
+View(SDS)
+hist(SDS$Upvotes, xlab = "Number of Upvotes", main = "Distribution of the Number of Upvotes",  right = FALSE, col = "turquoise")
+library(readxl)
+SDS <- read_excel("Library/Mobile Documents/com~apple~Numbers/Documents/SDS Project-Raw Data.xlsx")
+View(SDS)
+hist(SDS$Upvotes, xlab = "Number of Upvotes", main = "Distribution of the Number of Upvotes",
+right = FALSE, col = "turquoise")
+breaks = 10
+hist(SDS$Upvotes, xlab = "Number of Upvotes", main = "Distribution of the Number of Upvotes",
++      right = FALSE, col = "turquoise", breaks = 10)
+hist(SDS$Upvotes, xlab = "Number of Upvotes", main = "Distribution of the Number of Upvotes", right = FALSE, col = "turquoise", breaks = 10)
+library(readxl)
+SDS <- read_excel("Library/Mobile Documents/com~apple~Numbers/Documents/SDS Project-Raw Data.xlsx")
+View(SDS)
+hist(SDS$Upvotes, xlab = "Number of Upvotes", main = "Distribution of the Number of Upvotes", right = FALSE, col = "turquoise")
+library(readxl)
+SDS <- read_excel("Library/Mobile Documents/com~apple~Numbers/Documents/SDS Project-Raw Data.xlsx")
+View(SDS)
+hist(SDS$Upvotes, xlab = "Number of Upvotes", main = "Distribution of the Number of Upvotes", right = FALSE, col = "turquoise")
+fivenum(SDS$Upvotes)
+boxplot(SDS$Upvotes ~ SDS$Destination, xlab = "Destination", ylab = "Number of Upvotes", main = "Upvote Distribution of Destination", col = c("light blue", "light green", "light pink"))
+boxplot(SDS$Upvotes ~ SDS$Time, xlab = "Time of Day", ylab = "Number of Upvotes", main = "Upvote Distribution of Time of Day", col = c("light blue", "light green", "light pink"))
+plot(SDS$Upvotes, SDS$Comments, xlab = "Number of Upvotes", ylab = "Number of Comments", main = "Number of Reddit Comments and Upvotes", pch = 16)
+table(SDS$Destination)
+table(SDS$Time)
+sas6824 <- salaries
+sas6824 <- Salaries
+library(car)
+sas6824 <- Salaries
+View(sas6824)
+plot(sas6824$salary, sas6824$yrs.since.phd, xlab = "Salary ($)", ylab = "Years Since phd (yrs.)", main = "Salary and Years Since phd")
+sas6824$yrs.since.phd_c <- sas6824$yrs.since.phd - mean(sas6824$yrs.since.phd)
+sas6824$salary_c <- sas6824$salary - mean(sas6824$salary)
+my_glm_int <- lm(yrs.since.phd_c ~ Color * salary_c, data = sas6824)
+my_glm <- lm(yrs.since.phd ~ Color + Salaries, data = sas6824)
+library(car)
+sas6824 <- Robey
+summary(anova.test<-aov(tfr~ region + contraceptors, data = sas6824))
+multi_anova<-lm(tfr~ region + contraceptors, data = sas6824)
+Anova(multi_anova, type = 3)
+summary(multi_anova)$adj.r.squared
+options(contrasts =c(unordered = "contr.sum", ordered = "contr.poly"))
+int_anoval <- lm(tfr~ region  * contraceptors, data = sas6824)
+Anova(int.anoval, type=3)
+Anova(int.anoval, type = 3)
+View(SDS)
+multi-anova <- lm(Upvotes ~ Destination + Time, data = Upvotes)
+library(car)
+multi-anova <- lm(Upvotes ~ Destination + Time, data = Upvotes)
+multi-anova <- lm(Upvotes ~ Destination + Time, data = SDS)
+multi_anova <- lm(Upvotes ~ Destination + Time, data = SDS)
+Anova(multi_anova, type = 3)
+summary(multi_anova)$adj.r.squared
+options(contrasts = c(unordered = "contr.sum", ordered = "contr.poly"))
+int_anova1 <- lm(Upvotes ~ Destination * Time, data = SDS)
+Anova(int_anova1, type = 3)
+summary(int_anova1)$adj.r.squared
+options(contrasts = c(unordered = "contr.sum", ordered = "contr.poly"))
+mymodel1 <- lm(Upvotes ~ Destination * Time, data = SDS)
+Anova(mymodel1, type = 3)
+install.packages("emmeans")
+install.packages("ggplot2")
+library(emmeans)
+library(ggplot2)
+library(emmeans)
+mymeans <- summary(emmeans(mymodel1, pairwise ~ Destination | Time)$emmeans)
+mymeans_plot <- mymeans[c("Destination", "Time", "emmean", "SE")]
+ggplot(mymeans_plot, aes(x = Destination, y = emmean, col = Time)) +
+geom_point(position = position_dodge(width = 0.4)) + geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), width = 0.4, size = 0.7, position = position_dodge(width = 0.4)) +
+xlab("Travel Destination Type") + ylab("Number of Reddit Upvotes +/- SE") +
+ggtitle("Number of Reddit Upvotes by Location and Time of Day") + theme_classic()
+ggplot(mymeans_plot, aes(x = Destination, y = emmean, col = Time)) +
++     geom_point(position = position_dodge(width = 0.4)) + geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), width = 0.4, size = 0.7, position = position_dodge(width = 0.4)) +
++     xlab("Travel Destination Type") + ylab("Number of Reddit Upvotes +/- SE") +
++     ggtitle("Number of Reddit Upvotes by Destination and Time of Day") + theme_classic()
+ggplot(mymeans_plot, aes(x = Destination, y = emmean, col = Time)) + geom_point(position = position_dodge(width = 0.4)) + geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), width = 0.4, size = 0.7, position = position_dodge(width = 0.4)) + xlab("Travel Destination Type") + ylab("Number of Reddit Upvotes +/- SE") + ggtitle("Number of Reddit Upvotes by Destination and Time of Day") + theme_classic()
+leveneTest(Upvotes ~ Destination, data = SDS)
+> leveneTest(Upvotes ~ Time, data = SDS)
+leveneTest(Upvotes ~ Time, data = SDS)
+emmeans(int_anova1, pairwise ~ Destination | Time)
+emmeans(int_anova1, pairwise ~ Time | Destination)
+txhousing2<-read.csv("http://www.nathanielwoodward.com/txhousing2.csv")
+View(txhousing2)
+ncol(txhousing2)
+install.packages(devtools)
+devtools::install_github("tidyverse/tidyr")
+txhousing2$X <- NULL
+pivot_longer(c("inventory_mean.2000","inventory_mean.2001"), names_to="variable_stat.year", values_to="values")
+install.packages(devtools)
+pivot_longer(c(2:193), names_to="variable_stat.year", values_to="values")
+txhousing2%>%pivot_longer(cols=c(2:193), names_to="variable_stat.year", values_to="values")
+txhousing2 %>% pivot_longer(cols=c(2:193), names_to="variable_stat.year", values_to="values")
+install(tidyverse)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+install.packages("tidyverse")
+txhousing2 %>% pivot_longer(cols=c(2:193), names_to="variable_stat.year", values_to="values")
+library(dplyr)
+txhousing2 %>% pivot_longer(cols=c(2:193), names_to="variable_stat.year", values_to="values")
+library(dplyr)
+library(tidyr)
+txhousing2 %>% pivot_longer(cols=c(2:193), names_to="variable_stat.year", values_to="values")
+table1 -> txhousing2 %>% pivot_longer(cols=c(2:193), names_to="variable_stat.year", values_to="values")
+table1 = txhousing2 %>% pivot_longer(cols=c(2:193), names_to="variable_stat.year", values_to="values")
+View(table1)
+nrow(table1)
+table1%>%pivot_longer(contains(".", "_"))%>%
+separate(variable_stat.year,into=c("variable","stat","year"))%>%
+pivot_wider(names_from="stat",values_from="value")
+table1%>%pivot_longer(contains("."))%>%
+separate(variable_stat.year,into=c("variable","stat","year"))%>%
+pivot_wider(names_from="stat",values_from="value")
+table1%>%pivot_longer(contains("."))%>%
+separate("variable_stat.year",into=c("variable","stat","year"))%>%
+pivot_wider(names_from="stat",values_from="value")
+table1%>%pivot_longer(contains("."))%>%
+separate(variable_stat.year,into=c("variable","stat","year"))%>%
+pivot_wider(names_from="stat",values_from="value")
+table1%>%pivot_longer(contains(".","_"))%>%
+separate(variable_stat.year,into=c("variable","stat","year"))%>%
+pivot_wider(names_from="stat",values_from="value")
+table1%>%pivot_longer(contains(".","_"))%>%
+separate(variable_stat.year,into=c("variable","stat","year"))%>%
+pivot_wider(names_from="variable",stat",values_from="value")
+table1%>%pivot_longer(contains(".","_"))%>%
+separate(variable_stat.year,into=c("variable","stat","year"))%>%
+pivot_wider(names_from="variable",values_from="value")
+install.packages("tidyverse) library(tidyverse)
++ poke<-read.csv("https://gist.githubusercontent.com/armgilles/194bcff35001e7eb53a2a8b441e8b2c6/raw/92200bc0a673d5ce2110aaad4544ed6c4010f687/pokemon.csv", row.names="Name")
+install.packages("tidyverse)
+install.packages("tidyverse")
+install.packages("tidyverse")
+library(tidyverse)
+poke<-read.csv("https://gist.githubusercontent.com/armgilles/194bcff35001e7eb53a2a8b441e8b2c6/raw/92200bc0a673d5ce2110aaad4544ed6c4010f687/pokemon.csv", row.names="Name")
+View(poke)
+poke %>% select(-X.)
+poke2 <- poke %>% select(-X.)
+View(poke2)
+poke2 %>% group_by(Generation) %>% summarize(nrow(Generation))
+poke2 %>% group_by(Generation) %>% summarize(nrow()
+poke2 %>% group_by(Generation) %>% summarize(nrow())
+poke$Generation<-as.factor(poke$Generation)
+poke2$Generation<-as.factor(poke2$Generation)
+poke_nums <- poke2 %>% select_if(is.numeric)
+View(poke_nums)
+poke_dist1<-poke_nums%>%dist()
+poke_dist1<-poke_dist1%>%as.matrix%>%as.data.frame%>%rownames_to_column%>%pivot_longer(-1)
+View(poke_dist1)
+dist(poke_dist1,method = "euclidean")
+poke_dist1%>%summarize(euclidean = sqrt(diff(value)^2)
+poke_dist1%>%summarize(euclidean = sqrt(diff(value)^2)
+poke_dist1%>%summarize(euclidean = sqrt(diff(value)^2)
+dist(poke_dist1,method = "euclidean")
+poke_dist1<-poke_dist1%>%as.matrix%>%as.data.frame%>%rownames_to_column%>%gather(key, value, -1)
+poke_dist1%>%filter(value & value==max())
+poke_dist1%>%filter(value==max())
+poke_dist1%>%filter(value==max(value))
+poke_dist1%>%filter(value, value==max(value))
+poke_dist1%>%filter(value, value==min(value))
+poke_dist1%>%filter(value==min(value))
+poke_dist1%>%filter(rowname=="Snorlax", value==min(value))
+poke_dist1%>%filter(rowname=="Snorlax")
+snorlaxleast <- poke_dist1%>%filter(rowname=="Snorlax", value==min(value))
+View(snorlaxleast)
+snorlaxleast <- poke_dist1%>%filter(rowname=="Snorlax")
+View(snorlaxleast)
+snorlaxleast <- poke_dist1%>%filter(rowname=="Snorlax" & value==min(value))
+snorlaxleast <- poke_dist1%>%filter(rowname=="Snorlax")%>%arrange(desc(value))
+View(snorlaxleast)
+library(cluster)
+poke_dist2<-poke%>%select(-Generation,-Legendary)%>%daisy("gower")
+poke_dist2<-poke_dist2%>%as.matrix%>%as.data.frame%>%rownames_to_column%>%pivot_longer(-1)
+table1 <- poke_dist2%>%filter(rowname=="Snorlax")%>%arrange(desc(value))
+View(table1)
+Pottery<-read.csv("http://www.nathanielwoodward.com/Pottery.csv")
+View(Pottery)
+nrow(Pottery)
+Pottery%>%drop("Site")
+Pottery %>% drop(Site)
+install.packages("dplyr")
+Pottery %>% drop(Site)
+install.packages("ggplot")
+install.packages("tidyverse")
+Pottery %>% drop(Site)
+install.packages("blogdown")
+blogdown::install_hugo()
+blogdown::new_site(theme="themefisher/meghna-hugo")
+blogdown::new_site(theme="nurlansu/hugo-sustain")
+> blogdown::install_hugo()
+blogdown::install_hugo()
+TRUE

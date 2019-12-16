@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Sabrina Strausser" />
+    <meta name="description" content="This website is for my Project 3.">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Project 2: Modeling</title>
+    <meta name="generator" content="Hugo 0.61.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/blog/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project2/">Project 2: Modeling</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          January 1, 0001
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<pre class="r"><code>library(readr)
+data1 &lt;- read_csv(&quot;framingham.csv&quot;)
+library(readr)
+data2 &lt;- read_delim(&quot;cardio_train.csv&quot;, &quot;;&quot;, escape_double = FALSE, 
+    trim_ws = TRUE)
+library(dplyr)
+library(ggplot2)
+library(formatR)
+library(tidyverse)
+library(mvtnorm)
+library(lmtest)
+library(sandwich)</code></pre>
+<div id="sabrina-strausser-sas6824" class="section level2">
+<h2>Sabrina Strausser sas6824</h2>
+<hr />
+<div id="section" class="section level5">
+<h5>0.</h5>
+<p><em>For this project, I wanted to use my dataset from my first project, which presents data on diabetic and nondiabetic individuals. For each person, their age, BMI, gender, total cholesterol (“totChol”), heart rate (“heartRate”), whether they are a smoker or not (“currentSmoker”), glucose level (“glucose”), diabetic state (“diabetes”), systolic blood pressure (“sysBP”), and diastolic blood pressure (“diaBP”) has been recorded.</em></p>
+</div>
+<div id="section-1" class="section level5">
+<h5>1.</h5>
+<pre class="r"><code>data2$age &lt;- as.numeric(as.character(data2$age))/360
+data2$age &lt;- round(data2$age)
+data2$height &lt;- as.numeric(as.character(data2$height)) * 0.01
+data2 &lt;- data2 %&gt;% mutate(BMI = weight/((height)^2))
+data2 &lt;- subset(data2, select = -c(height, weight))
+data2$gender[data2$gender == 2] &lt;- &quot;male&quot;
+data2$gender[data2$gender == 1] &lt;- &quot;female&quot;
+colnames(data1)[colnames(data1) == &quot;male&quot;] &lt;- &quot;gender&quot;
+data1$gender[data1$gender == 1] &lt;- &quot;male&quot;
+data1$gender[data1$gender == 0] &lt;- &quot;female&quot;
+data1$currentSmoker[data1$currentSmoker == 0] &lt;- &quot;nonsmoker&quot;
+data1$currentSmoker[data1$currentSmoker == 1] &lt;- &quot;smoker&quot;
+colnames(data2)[colnames(data2) == &quot;smoke&quot;] &lt;- &quot;currentSmoker&quot;
+data2$currentSmoker[data2$currentSmoker == 1] &lt;- &quot;smoker&quot;
+data2$currentSmoker[data2$currentSmoker == 0] &lt;- &quot;nonsmoker&quot;
+colnames(data2)[colnames(data2) == &quot;ap_hi&quot;] &lt;- &quot;sysBP&quot;
+colnames(data2)[colnames(data2) == &quot;ap_lo&quot;] &lt;- &quot;diaBP&quot;
+data2 &lt;- subset(data2, select = -c(id, cholesterol, gluc, alco, 
+    active, cardio))
+data1 &lt;- subset(data1, select = -c(TenYearCHD))
+full &lt;- full_join(data1, data2)
+full &lt;- subset(full, select = -c(cigsPerDay, BPMeds, prevalentStroke, 
+    prevalentHyp, education))
+full$diabetes[full$diabetes == 1] &lt;- &quot;diabetic&quot;
+full$diabetes[full$diabetes == 0] &lt;- &quot;nondiabetic&quot;
+full &lt;- full %&gt;% drop_na()
+manova &lt;- manova(cbind(totChol, sysBP, diaBP, BMI, heartRate, 
+    glucose) ~ diabetes, data = full)
+summary(manova)</code></pre>
+<pre><code>##             Df  Pillai approx F num Df den Df    Pr(&gt;F)    
+## diabetes     1 0.37897   388.51      6   3820 &lt; 2.2e-16 ***
+## Residuals 3825                                             
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>summary.aov(manova)</code></pre>
+<pre><code>##  Response totChol :
+##               Df  Sum Sq Mean Sq F value   Pr(&gt;F)   
+## diabetes       1   14236   14236  7.1146 0.007678 **
+## Residuals   3825 7653844    2001                    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response sysBP :
+##               Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## diabetes       1   21012 21011.9  43.601 4.581e-11 ***
+## Residuals   3825 1843330   481.9                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response diaBP :
+##               Df Sum Sq Mean Sq F value   Pr(&gt;F)   
+## diabetes       1   1373 1373.43  9.6141 0.001945 **
+## Residuals   3825 546420  142.85                    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response BMI :
+##               Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## diabetes       1    587  587.35  35.836 2.344e-09 ***
+## Residuals   3825  62692   16.39                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response heartRate :
+##               Df Sum Sq Mean Sq F value  Pr(&gt;F)    
+## diabetes       1   2028 2027.71  14.279 0.00016 ***
+## Residuals   3825 543190  142.01                    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response glucose :
+##               Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## diabetes       1  812993  812993  2310.6 &lt; 2.2e-16 ***
+## Residuals   3825 1345815     352                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>full %&gt;% group_by(diabetes) %&gt;% summarize(mean(totChol), mean(sysBP), 
+    mean(diaBP), mean(BMI), mean(heartRate), mean(glucose))</code></pre>
+<pre><code>## # A tibble: 2 x 7
+##   diabetes `mean(totChol)` `mean(sysBP)` `mean(diaBP)` `mean(BMI)`
+##   &lt;chr&gt;              &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;       &lt;dbl&gt;
+## 1 diabetic            249.          146.          86.5        28.2
+## 2 nondiab…            237.          132.          82.9        25.7
+## # … with 2 more variables: `mean(heartRate)` &lt;dbl&gt;, `mean(glucose)` &lt;dbl&gt;</code></pre>
+<pre class="r"><code>0.05/7</code></pre>
+<pre><code>## [1] 0.007142857</code></pre>
+<p><em>A MANOVA was performed to determine the effect of the diabetic state (diabetic or nondiabetic) on six dependent variables (totChol, sysBP, diaBP, BMI, heartRate, and glucose). The assumptions for MANOVAs are random samples and independent observations, multivariate normality of DVs, homogeneity of within-group covariance matrices, linear relationships among DVs, no extreme univariate or multivariate outliers, and finally, no multicollinearity. Because there are lots of assumptions, it is difficult to say that they have all been met. For instance, no multicollinearity is difficult to meet because the dependent variables may in fact be correlated due to all of them being related to diabetes in some way. Nevertheless, 1 MANOVA, 6 ANOVAs, and 0 t tests were performed, making the significance level (bonferroni correction) equal to 0.007142857. Using this significance level, we can see that all of the numeric variables except for totChol show a mean difference across levels of the diabetes categorical variable. These numeric variables are sysBP, diaBP, BMI, heartRate, and glucose. This is because the p-values for these numeric variables are all less than 0.007142857. No t tests were performed due to the presence of only two levels for the categorical variable.</em></p>
+</div>
+<div id="section-2" class="section level5">
+<h5>2.</h5>
+<pre class="r"><code>full %&gt;% group_by(diabetes) %&gt;% summarize(means = mean(age)) %&gt;% 
+    summarize(`mean_diff:` = diff(means))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean_diff:`
+##          &lt;dbl&gt;
+## 1        -5.71</code></pre>
+<pre class="r"><code>rand_dist &lt;- vector()
+for (i in 1:5000) {
+    new &lt;- data.frame(age = sample(full$age), diabetes = full$diabetes)
+    rand_dist[i] &lt;- mean(new[new$diabetes == &quot;diabetic&quot;, ]$age) - 
+        mean(new[new$diabetes == &quot;nondiabetic&quot;, ]$age)
+}
+{
+    hist(rand_dist, main = &quot;&quot;, ylab = &quot;&quot;)
+    abline(v = -5.71, col = &quot;red&quot;)
+}</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-3-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>mean(rand_dist &gt; 5.71) * 2</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>t.test(data = full, age ~ diabetes)</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  age by diabetes
+## t = 7.673, df = 110.72, p-value = 7.075e-12
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  4.234351 7.182982
+## sample estimates:
+##    mean in group diabetic mean in group nondiabetic 
+##                  55.17308                  49.46441</code></pre>
+<p><em>The null hypothesis is that the mean age is the same for diabetics versus nondiabetics. The alternative hypothesis is that the mean age is different for diabetics versus nondiabetics. Since we obtain p-values of 0 and 7.075e-12, which are extremely small values, we can reject the null hypothesis and conclude that the mean age is different for diabetics versus nondiabetics.</em></p>
+</div>
+<div id="section-3" class="section level5">
+<h5>3.</h5>
+<pre class="r"><code>fit1 &lt;- lm(sysBP ~ totChol + glucose, data = full)
+summary(fit1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = sysBP ~ totChol + glucose, data = full)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -76.596 -14.830  -3.784  10.862 162.256 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 98.700143   2.168438  45.517  &lt; 2e-16 ***
+## totChol      0.103170   0.007735  13.338  &lt; 2e-16 ***
+## glucose      0.113449   0.014578   7.782  9.1e-15 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 21.4 on 3824 degrees of freedom
+## Multiple R-squared:  0.06107,    Adjusted R-squared:  0.06058 
+## F-statistic: 124.4 on 2 and 3824 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>resBP &lt;- lm(sysBP ~ glucose, data = full)$residuals
+resChol &lt;- lm(totChol ~ glucose, data = full)$residuals
+coef(lm(resBP ~ resChol))</code></pre>
+<pre><code>##   (Intercept)       resChol 
+## -1.636279e-15  1.031700e-01</code></pre>
+<pre class="r"><code>coef(lm(sysBP ~ totChol + glucose, data = full))</code></pre>
+<pre><code>## (Intercept)     totChol     glucose 
+##  98.7001426   0.1031700   0.1134485</code></pre>
+<pre class="r"><code>resBP2 &lt;- lm(sysBP ~ totChol, data = full)$residuals
+resglucose &lt;- lm(glucose ~ totChol, data = full)$residuals
+coef(lm(resBP2 ~ resglucose))</code></pre>
+<pre><code>##   (Intercept)    resglucose 
+## -1.730743e-16  1.134485e-01</code></pre>
+<pre class="r"><code>coef(lm(sysBP ~ totChol + glucose, data = full))</code></pre>
+<pre><code>## (Intercept)     totChol     glucose 
+##  98.7001426   0.1031700   0.1134485</code></pre>
+<pre class="r"><code>full$totChol_c &lt;- full$totChol - mean(full$totChol)
+full$glucose_c &lt;- full$glucose - mean(full$glucose)
+fit2 &lt;- lm(sysBP ~ totChol_c * glucose_c, data = full)
+summary(fit2)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = sysBP ~ totChol_c * glucose_c, data = full)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -63.857 -14.803  -3.732  10.863 162.202 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)          1.325e+02  3.461e-01 382.781  &lt; 2e-16 ***
+## totChol_c            1.039e-01  7.749e-03  13.410  &lt; 2e-16 ***
+## glucose_c            1.184e-01  1.493e-02   7.929 2.87e-15 ***
+## totChol_c:glucose_c -4.230e-04  2.773e-04  -1.525    0.127    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 21.39 on 3823 degrees of freedom
+## Multiple R-squared:  0.06164,    Adjusted R-squared:  0.0609 
+## F-statistic: 83.71 on 3 and 3823 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>qplot(x = totChol_c, y = sysBP, color = glucose_c, data = full) + 
+    stat_smooth(method = &quot;lm&quot;, se = FALSE, fullrange = TRUE)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>resids &lt;- fit2$residuals
+fitvals &lt;- fit2$fitted.values
+ggplot() + geom_point(aes(fitvals, resids)) + geom_hline(yintercept = 0, 
+    col = &quot;red&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>bptest(fit2)</code></pre>
+<pre><code>## 
+##  studentized Breusch-Pagan test
+## 
+## data:  fit2
+## BP = 41.298, df = 3, p-value = 5.654e-09</code></pre>
+<pre class="r"><code>ggplot() + geom_histogram(aes(resids), bins = 20)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-3.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot() + geom_qq(aes(sample = resids)) + geom_qq_line(aes(sample = resids), 
+    color = &quot;red&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-4.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>coeftest(fit2)[, 1:2]</code></pre>
+<pre><code>##                          Estimate   Std. Error
+## (Intercept)          1.324678e+02 0.3460669645
+## totChol_c            1.039175e-01 0.0077490086
+## glucose_c            1.183948e-01 0.0149314410
+## totChol_c:glucose_c -4.229789e-04 0.0002772731</code></pre>
+<pre class="r"><code>coeftest(fit2, vcov = vcovHC(fit2))[, 1:2]</code></pre>
+<pre><code>##                          Estimate   Std. Error
+## (Intercept)          1.324678e+02 0.3465090862
+## totChol_c            1.039175e-01 0.0079568882
+## glucose_c            1.183948e-01 0.0222999793
+## totChol_c:glucose_c -4.229789e-04 0.0006020703</code></pre>
+<p><em>With glucose being controlled, when we regress the residual variation in BP on residual variation in totChol, we get the same totChol coefficient as when residuals are not used. Similarly, with totChol being controlled, when we regress the residual variation in BP on residual variation in glucose, we get the same glucose coefficient as when residuals are not used. As for the summary of fit2, there appears to be no interaction between totChol_c and glucose_c. Linearity and homoskedasticity were checked, however the points were not scattered but were somewhat concentrated instead. According to thegraphs, normality appeared to be ok, but not perfect. Robust standard errors were then used. The robust standard errors were very similar to the original standard errors, just slightly larger values.</em></p>
+</div>
+<div id="section-4" class="section level5">
+<h5>4.</h5>
+<pre class="r"><code>samp_distn &lt;- replicate(5000, {
+    boot_dat &lt;- boot_dat &lt;- full[sample(nrow(full), replace = TRUE), 
+        ]
+    fit2 &lt;- lm(sysBP ~ totChol_c * glucose_c, data = full)
+    coef(fit2)
+})
+samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept) totChol_c glucose_c totChol_c:glucose_c
+## 1           0         0         0                   0</code></pre>
+<p><em>When computing bootstrapped standard errors, the following error is given: “Error in fitted + new_resids : non-numeric argument to binary operator”</em></p>
+</div>
+<div id="section-5" class="section level5">
+<h5>5.</h5>
+<pre class="r"><code>full$diabetes[full$diabetes == &quot;diabetic&quot;] &lt;- &quot;1&quot;
+full$diabetes[full$diabetes == &quot;nondiabetic&quot;] &lt;- &quot;0&quot;
+full$diabetes &lt;- as.numeric(full$diabetes)
+fit3 &lt;- glm(diabetes ~ totChol + sysBP, data = full, family = &quot;binomial&quot;)
+coeftest(fit3)</code></pre>
+<pre><code>## 
+## z test of coefficients:
+## 
+##               Estimate Std. Error  z value  Pr(&gt;|z|)    
+## (Intercept) -7.2629408  0.6631151 -10.9528 &lt; 2.2e-16 ***
+## totChol      0.0030121  0.0020528   1.4673    0.1423    
+## sysBP        0.0213304  0.0035892   5.9430 2.799e-09 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>pca1 &lt;- princomp(full[c(&quot;totChol&quot;, &quot;sysBP&quot;)])
+full$predictor &lt;- pca1$scores[, 1]
+fit4 &lt;- glm(diabetes ~ predictor, data = full, family = &quot;binomial&quot;)
+full$prob &lt;- predict(fit4, type = &quot;response&quot;)
+ggplot(full, aes(predictor, prob)) + geom_point(aes(color = diabetes), 
+    alpha = 0.5, size = 3)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-6-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(full, aes(predictor, prob)) + geom_point(aes(color = diabetes), 
+    alpha = 0.5, size = 3) + geom_rug(aes(color = diabetes), 
+    sides = &quot;right&quot;) + geom_hline(yintercept = 0.5)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-6-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>table(predict = as.numeric(full$prob &gt; 0.5), truth = full$diabetes) %&gt;% 
+    addmargins</code></pre>
+<pre><code>##        truth
+## predict    0    1  Sum
+##     0   3723  104 3827
+##     Sum 3723  104 3827</code></pre>
+<pre class="r"><code>mean(full[full$diabetes == 1, ]$prob &gt; 0.1)</code></pre>
+<pre><code>## [1] 0.009615385</code></pre>
+<pre class="r"><code>mean(full[full$diabetes == 0, ]$prob &lt; 0.1)</code></pre>
+<pre><code>## [1] 0.9997314</code></pre>
+<pre class="r"><code>sens &lt;- function(p, data = full, y = diabetes) mean(full[full$diabetes == 
+    1, ]$prob &gt; p)
+spec &lt;- function(p, data = full, y = diabetes) mean(full[full$diabetes == 
+    0, ]$prob &lt; p)
+sensitivity &lt;- sapply(seq(0, 1, 0.01), sens, full)
+specificity &lt;- sapply(seq(0, 1, 0.01), spec, full)
+ROC1 &lt;- data.frame(sensitivity, specificity, cutoff = seq(0, 
+    1, 0.01))
+ROC1 %&gt;% gather(key, rate, -cutoff) %&gt;% ggplot(aes(cutoff, rate, 
+    color = key)) + geom_path() + geom_vline(xintercept = c(0.1, 
+    0.5), lty = 2, color = &quot;gray50&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-6-3.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ROC1$TPR &lt;- sensitivity
+ROC1$FPR &lt;- 1 - specificity
+ROC1 %&gt;% ggplot(aes(FPR, TPR)) + geom_path(size = 1.5) + geom_segment(aes(x = 0, 
+    y = 0, xend = 1, yend = 1), lty = 2) + scale_x_continuous(limits = c(0, 
+    1))</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-6-4.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>widths &lt;- diff(ROC1$FPR)
+heights &lt;- vector()
+for (i in 1:100) heights[i] &lt;- ROC1$TPR[i] + ROC1$TPR[i + 1]
+AUC &lt;- sum(heights * widths/2)
+AUC %&gt;% round(3)</code></pre>
+<pre><code>## [1] -0.557</code></pre>
+<pre class="r"><code>ranks &lt;- replicate(5000, {
+    ifelse(sample(ROC1[ROC1$am == 1, ]$prob) &gt; sample(ROC1[ROC1$am == 
+        0, ]$prob), 1, ifelse(sample(ROC1[ROC1$am == 1, ]$prob) == 
+        sample(ROC1[ROC1$am == 0, ]$prob), 0.5, 0))
+})
+mean(ranks)</code></pre>
+<pre><code>## Warning in mean.default(ranks): argument is not numeric or logical: returning NA</code></pre>
+<pre><code>## [1] NA</code></pre>
+<pre class="r"><code>set.seed(1234)
+k = 10
+data1 &lt;- full[sample(nrow(full)), ]
+folds &lt;- cut(seq(1:nrow(full)), breaks = k, labels = F)</code></pre>
+<p><em>After performing coeftest(fit3), it appears that there is a relationship/significance between diabetes and sysBP. The specificity is equal to 3723/3723 which is 1. </em></p>
+</div>
+<div id="section-6" class="section level5">
+<h5>6.</h5>
+<pre class="r"><code>y &lt;- as.matrix(full$sysBP)</code></pre>
+<p><em>Because some of my variables are not numeric, I am receiving the error that “x” must be numeric.</em></p>
+</div>
+</div>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

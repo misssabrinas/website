@@ -1,0 +1,188 @@
+---
+title: 'Project 2: Modeling'
+author: "SDS348 Fall 2019"
+date: "11/26/2019"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r global_options, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.align="center", fig.height=5, message=FALSE, fig.width=8,tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
+
+```{R}
+library(readr)
+data1 <- read_csv("framingham.csv")
+library(readr)
+data2 <- read_delim("cardio_train.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+library(dplyr)
+library(ggplot2)
+library(formatR)
+library(tidyverse)
+library(mvtnorm)
+library(lmtest)
+library(sandwich)
+```
+
+## Sabrina Strausser sas6824
+
+---
+
+##### 0.
+
+*For this project, I wanted to use my dataset from my first project, which presents data on diabetic and nondiabetic individuals. For each person, their age, BMI, gender, total cholesterol ("totChol"), heart rate ("heartRate"), whether they are a smoker or not ("currentSmoker"), glucose level ("glucose"), diabetic state ("diabetes"), systolic blood pressure ("sysBP"), and diastolic blood pressure ("diaBP") has been recorded.*
+
+##### 1.
+
+```{R}
+data2$age <- as.numeric(as.character(data2$age)) / 360
+data2$age<-round(data2$age)
+data2$height <- as.numeric(as.character(data2$height)) * 0.01
+data2 <- data2 %>% mutate(BMI = weight/((height)^2))
+data2 <- subset(data2, select = -c(height, weight))
+data2$gender[data2$gender==2] <- "male"
+data2$gender[data2$gender==1] <- "female"
+colnames(data1)[colnames(data1)=="male"] <- "gender"
+data1$gender[data1$gender==1] <- "male"
+data1$gender[data1$gender==0] <- "female"
+data1$currentSmoker[data1$currentSmoker==0] <- "nonsmoker"
+data1$currentSmoker[data1$currentSmoker==1] <- "smoker"
+colnames(data2)[colnames(data2)=="smoke"] <- "currentSmoker"
+data2$currentSmoker[data2$currentSmoker==1] <- "smoker"
+data2$currentSmoker[data2$currentSmoker==0] <- "nonsmoker"
+colnames(data2)[colnames(data2)=="ap_hi"] <- "sysBP"
+colnames(data2)[colnames(data2)=="ap_lo"] <- "diaBP"
+data2 <- subset(data2, select = -c(id, cholesterol, gluc, alco, active, cardio))
+data1 <- subset(data1, select = -c(TenYearCHD))
+full <- full_join(data1, data2)
+full <- subset(full, select = -c(cigsPerDay, BPMeds, prevalentStroke, prevalentHyp, education))
+full$diabetes[full$diabetes==1] <- "diabetic"
+full$diabetes[full$diabetes==0] <- "nondiabetic"
+full <- full %>% drop_na()
+manova<-manova(cbind(totChol,sysBP,diaBP,BMI,heartRate,glucose)~diabetes, data=full)
+summary(manova)
+summary.aov(manova)
+full%>%group_by(diabetes)%>%summarize(mean(totChol),mean(sysBP),mean(diaBP),mean(BMI),mean(heartRate),mean(glucose))
+.05/7
+```
+
+*A MANOVA was performed to determine the effect of the diabetic state (diabetic or nondiabetic) on six dependent variables (totChol, sysBP, diaBP, BMI, heartRate, and glucose). The assumptions for MANOVAs are random samples and independent observations, multivariate normality of DVs, homogeneity of within-group covariance matrices, linear relationships among DVs, no extreme univariate or multivariate outliers, and finally, no multicollinearity. Because there are lots of assumptions, it is difficult to say that they have all been met. For instance, no multicollinearity is difficult to meet because the dependent variables may in fact be correlated due to all of them being related to diabetes in some way. Nevertheless, 1 MANOVA, 6 ANOVAs, and 0 t tests were performed, making the significance level (bonferroni correction) equal to 0.007142857. Using this significance level, we can see that all of the numeric variables except for totChol show a mean difference across levels of the diabetes categorical variable. These numeric variables are sysBP, diaBP, BMI, heartRate, and glucose. This is because the p-values for these numeric variables are all less than 0.007142857. No t tests were performed due to the presence of only two levels for the categorical variable.*
+
+##### 2.
+
+```{R}
+full%>%group_by(diabetes)%>%summarize(means=mean(age))%>%summarize(`mean_diff:`=diff(means))
+rand_dist<-vector()
+for(i in 1:5000){
+new<-data.frame(age=sample(full$age),diabetes=full$diabetes)
+rand_dist[i]<-mean(new[new$diabetes=="diabetic",]$age)-
+              mean(new[new$diabetes=="nondiabetic",]$age)}
+{hist(rand_dist,main="",ylab=""); abline(v = -5.71,col="red")}
+mean(rand_dist>5.71)*2
+t.test(data=full,age~diabetes)
+```
+
+*The null hypothesis is that the mean age is the same for diabetics versus nondiabetics. The alternative hypothesis is that the mean age is different for diabetics versus nondiabetics. Since we obtain p-values of 0 and 7.075e-12, which are extremely small values, we can reject the null hypothesis and conclude that the mean age is different for diabetics versus nondiabetics.*
+
+##### 3.
+
+```{R}
+fit1<-lm(sysBP ~ totChol + glucose, data=full)
+summary(fit1)
+resBP<-lm(sysBP~glucose, data=full)$residuals
+resChol<-lm(totChol~glucose, data=full)$residuals
+coef(lm(resBP~resChol))
+coef(lm(sysBP~totChol+glucose,data=full))
+resBP2<-lm(sysBP~totChol, data=full)$residuals
+resglucose<-lm(glucose~totChol, data=full)$residuals
+coef(lm(resBP2~resglucose))
+coef(lm(sysBP~totChol+glucose,data=full))
+full$totChol_c<-full$totChol-mean(full$totChol)
+full$glucose_c<-full$glucose-mean(full$glucose)
+fit2<-lm(sysBP ~ totChol_c * glucose_c, data=full)
+summary(fit2)
+qplot(x = totChol_c, y = sysBP, color = glucose_c, data = full) +   stat_smooth(method = "lm", se = FALSE, fullrange = TRUE)
+resids<-fit2$residuals
+fitvals<-fit2$fitted.values 
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, col="red")
+bptest(fit2)
+ggplot()+geom_histogram(aes(resids),bins=20)
+ggplot()+geom_qq(aes(sample=resids))+geom_qq_line(aes(sample=resids), color='red')
+coeftest(fit2)[,1:2]
+coeftest(fit2, vcov=vcovHC(fit2))[,1:2]
+```
+
+*With glucose being controlled, when we regress the residual variation in BP on residual variation in totChol, we get the same totChol coefficient as when residuals are not used. Similarly, with totChol being controlled, when we regress the residual variation in BP on residual variation in glucose, we get the same glucose coefficient as when residuals are not used. As for the summary of fit2, there appears to be no interaction between totChol_c and glucose_c. Linearity and homoskedasticity were checked, however the points were not scattered but were somewhat concentrated instead. According to thegraphs, normality appeared to be ok, but not perfect. Robust standard errors were then used. The robust standard errors were very similar to the original standard errors, just slightly larger values.*
+
+##### 4.
+
+```{R}
+samp_distn<-replicate(5000, {  
+     boot_dat<-boot_dat<-full[sample(nrow(full),replace=TRUE),]   
+     fit2<-lm(sysBP ~ totChol_c * glucose_c, data=full)   
+     coef(fit2) 
+ })
+samp_distn%>%t%>%as.data.frame%>%summarize_all(sd)
+```
+
+*When computing bootstrapped standard errors, the following error is given: "Error in fitted + new_resids : non-numeric argument to binary operator"*
+
+##### 5.
+
+```{R}
+full$diabetes[full$diabetes=="diabetic"] <- "1"
+full$diabetes[full$diabetes=="nondiabetic"] <- "0"
+full$diabetes <- as.numeric(full$diabetes)
+fit3<-glm(diabetes~totChol+sysBP, data=full, family="binomial") 
+coeftest(fit3)
+pca1<-princomp(full[c('totChol','sysBP')]) 
+full$predictor<-pca1$scores[,1]
+fit4<-glm(diabetes~predictor,data=full,family="binomial")
+full$prob<-predict(fit4,type="response")
+ggplot(full, aes(predictor,prob))+geom_point(aes(color=diabetes),alpha=.5,size=3)
+ggplot(full, aes(predictor,prob))+geom_point(aes(color=diabetes),alpha=.5,size=3)+   geom_rug(aes(color=diabetes),sides="right")+geom_hline(yintercept=.5)
+table(predict=as.numeric(full$prob>.5),truth=full$diabetes)%>%addmargins
+mean(full[full$diabetes==1,]$prob>.1)
+mean(full[full$diabetes==0,]$prob<.1)
+sens<-function(p,data=full, y=diabetes) mean(full[full$diabetes==1,]$prob>p) 
+spec<-function(p,data=full, y=diabetes) mean(full[full$diabetes==0,]$prob<p)
+sensitivity<-sapply(seq(0,1,.01),sens,full)
+specificity<-sapply(seq(0,1,.01),spec,full)
+ROC1<-data.frame(sensitivity,specificity,cutoff=seq(0,1,.01))
+ROC1%>%gather(key,rate,-cutoff)%>%ggplot(aes(cutoff,rate,color=key))+geom_path()+   geom_vline(xintercept=c(.1,.5),lty=2,color="gray50")
+ROC1$TPR<-sensitivity 
+ROC1$FPR<-1-specificity
+ROC1%>%ggplot(aes(FPR,TPR))+geom_path(size=1.5)+geom_segment(aes(x=0,y=0,xend=1,yend=1),lty=2)+   scale_x_continuous(limits = c(0,1))
+widths<-diff(ROC1$FPR)
+heights<-vector()
+for(i in 1:100) heights[i]<-ROC1$TPR[i]+ROC1$TPR[i+1]
+AUC<-sum(heights*widths/2) 
+AUC%>%round(3)
+ranks<-replicate(5000,{   
+    ifelse(sample(ROC1[ROC1$am==1,]$prob) > sample(ROC1[ROC1$am==0,]$prob), 1,   
+    ifelse(sample(ROC1[ROC1$am==1,]$prob) == sample(ROC1[ROC1$am==0,]$prob), .5, 0)) 
+})
+mean(ranks)
+set.seed(1234) 
+k=10
+data1<-full[sample(nrow(full)),]
+folds<-cut(seq(1:nrow(full)),breaks=k,labels=F)
+```
+
+*After performing coeftest(fit3), it appears that there is a relationship/significance between diabetes and sysBP. The specificity is equal to 3723/3723 which is 1. *
+
+##### 6.
+
+```{R}
+y<-as.matrix(full$sysBP)
+```
+
+*Because some of my variables are not numeric, I am receiving the error that "x" must be numeric.*

@@ -1,0 +1,322 @@
+---
+title: 'Project 1: Exploratory Data Analysis'
+author: "SDS348 Fall 2019"
+date: "10/20/2019"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+
+
+<pre class="r"><code>library(readr)
+data1 &lt;- read_csv(&quot;framingham.csv&quot;)
+library(readr)
+data2 &lt;- read_delim(&quot;cardio_train.csv&quot;, &quot;;&quot;, escape_double = FALSE, 
+    trim_ws = TRUE)
+library(dplyr)
+library(ggplot2)
+library(formatR)
+library(tidyverse)</code></pre>
+<div id="sabrina-strausser-sas6824" class="section level2">
+<h2>Sabrina Strausser sas6824</h2>
+<hr />
+<div id="introduction" class="section level5">
+<h5>0. Introduction</h5>
+<p><em>Since I am interested in going into the medical field, I wanted to work with some datasets related to health. I chose my two datasets because both study the effects of smoking, BMI, gender, and age on blood pressure. The shared variables between the two datasets include smoking, BMI, age, gender, and blood pressure, while the unshared variables include total cholesterol, glucose, diabetes, and heart rate. I was able to find these two datasets on the Kaggle website suggested by Dr. Woodward, and I believe that the ggplots produced in this project will provide a strong correlation between smoking and heart disease.</em></p>
+</div>
+<div id="tidying" class="section level5">
+<h5>1. Tidying</h5>
+<pre class="r"><code>data1 &lt;- data1 %&gt;% pivot_wider(names_from = &quot;totChol&quot;, values_from = &quot;sysBP&quot;)
+data1 &lt;- data1 %&gt;% pivot_longer(cols = c(15:263), names_to = &quot;totChol&quot;, 
+    values_to = &quot;sysBP&quot;, values_drop_na = T)
+data2 &lt;- data2 %&gt;% pivot_wider(names_from = &quot;height&quot;, values_from = &quot;weight&quot;)
+data2 &lt;- data2 %&gt;% pivot_longer(cols = c(12:120), names_to = &quot;height&quot;, 
+    values_to = &quot;weight&quot;, values_drop_na = T)</code></pre>
+<p><em>Because my datasets were already tidy, I had to use pivot_wider on both of my datasets to make them untidy. This action gave my datasets more columns instead of more rows. Next, to make the datasets tidy again, I used pivot_longer to create less columns and more rows.</em></p>
+</div>
+<div id="joiningmerging" class="section level5">
+<h5>2. Joining/Merging</h5>
+<pre class="r"><code>glimpse(data2)</code></pre>
+<pre><code>## Observations: 70,000
+## Variables: 13
+## $ id          &lt;dbl&gt; 0, 1, 2, 3, 4, 8, 9, 12, 13, 14, 15, 16, 18, 21, 23, 24, …
+## $ age         &lt;dbl&gt; 18393, 20228, 18857, 17623, 17474, 21914, 22113, 22584, 1…
+## $ gender      &lt;dbl&gt; 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 2, 2, 1, 1, 1, …
+## $ ap_hi       &lt;dbl&gt; 110, 140, 130, 150, 100, 120, 130, 130, 110, 110, 120, 12…
+## $ ap_lo       &lt;dbl&gt; 80, 90, 70, 100, 60, 80, 80, 90, 70, 60, 80, 80, 80, 70, …
+## $ cholesterol &lt;dbl&gt; 1, 3, 3, 1, 1, 2, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ gluc        &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, …
+## $ smoke       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, …
+## $ alco        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, …
+## $ active      &lt;dbl&gt; 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, …
+## $ cardio      &lt;dbl&gt; 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, …
+## $ height      &lt;chr&gt; &quot;168&quot;, &quot;156&quot;, &quot;165&quot;, &quot;169&quot;, &quot;156&quot;, &quot;151&quot;, &quot;157&quot;, &quot;178&quot;, &quot;…
+## $ weight      &lt;dbl&gt; 62, 85, 64, 82, 56, 67, 93, 95, 71, 68, 80, 60, 60, 78, 9…</code></pre>
+<pre class="r"><code>glimpse(data1)</code></pre>
+<pre><code>## Observations: 4,240
+## Variables: 16
+## $ male            &lt;dbl&gt; 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0,…
+## $ age             &lt;dbl&gt; 39, 46, 48, 61, 46, 43, 63, 45, 52, 43, 50, 43, 46, 4…
+## $ education       &lt;dbl&gt; 4, 2, 1, 3, 3, 2, 1, 2, 1, 1, 1, 2, 1, 3, 2, 2, 3, 2,…
+## $ currentSmoker   &lt;dbl&gt; 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1,…
+## $ cigsPerDay      &lt;dbl&gt; 0, 0, 20, 30, 23, 0, 0, 20, 0, 30, 0, 0, 15, 0, 9, 20…
+## $ BPMeds          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,…
+## $ prevalentStroke &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ prevalentHyp    &lt;dbl&gt; 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0,…
+## $ diabetes        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ diaBP           &lt;dbl&gt; 70.0, 81.0, 80.0, 95.0, 84.0, 110.0, 71.0, 71.0, 89.0…
+## $ BMI             &lt;dbl&gt; 26.97, 28.73, 25.34, 28.58, 23.10, 30.30, 33.11, 21.6…
+## $ heartRate       &lt;dbl&gt; 80, 95, 75, 65, 85, 77, 60, 79, 76, 93, 75, 72, 98, 6…
+## $ glucose         &lt;dbl&gt; 77, 76, 70, 103, 85, 99, 85, 78, 79, 88, 76, 61, 64, …
+## $ TenYearCHD      &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1,…
+## $ totChol         &lt;chr&gt; &quot;195&quot;, &quot;250&quot;, &quot;245&quot;, &quot;225&quot;, &quot;285&quot;, &quot;228&quot;, &quot;205&quot;, &quot;313…
+## $ sysBP           &lt;dbl&gt; 106.0, 121.0, 127.5, 150.0, 130.0, 180.0, 138.0, 100.…</code></pre>
+<pre class="r"><code>data2$age &lt;- as.numeric(as.character(data2$age))/360
+data2$age &lt;- round(data2$age)
+data2$height &lt;- as.numeric(as.character(data2$height)) * 0.01
+data2 &lt;- data2 %&gt;% mutate(BMI = weight/((height)^2))
+data2 &lt;- subset(data2, select = -c(height, weight))
+data2$gender[data2$gender == 2] &lt;- &quot;male&quot;
+data2$gender[data2$gender == 1] &lt;- &quot;female&quot;
+colnames(data1)[colnames(data1) == &quot;male&quot;] &lt;- &quot;gender&quot;
+data1$gender[data1$gender == 1] &lt;- &quot;male&quot;
+data1$gender[data1$gender == 0] &lt;- &quot;female&quot;
+data1$currentSmoker[data1$currentSmoker == 0] &lt;- &quot;nonsmoker&quot;
+data1$currentSmoker[data1$currentSmoker == 1] &lt;- &quot;smoker&quot;
+colnames(data2)[colnames(data2) == &quot;smoke&quot;] &lt;- &quot;currentSmoker&quot;
+data2$currentSmoker[data2$currentSmoker == 1] &lt;- &quot;smoker&quot;
+data2$currentSmoker[data2$currentSmoker == 0] &lt;- &quot;nonsmoker&quot;
+colnames(data2)[colnames(data2) == &quot;ap_hi&quot;] &lt;- &quot;sysBP&quot;
+colnames(data2)[colnames(data2) == &quot;ap_lo&quot;] &lt;- &quot;diaBP&quot;
+glimpse(data2)</code></pre>
+<pre><code>## Observations: 70,000
+## Variables: 12
+## $ id            &lt;dbl&gt; 0, 1, 2, 3, 4, 8, 9, 12, 13, 14, 15, 16, 18, 21, 23, 24…
+## $ age           &lt;dbl&gt; 51, 56, 52, 49, 49, 61, 61, 63, 49, 55, 63, 52, 41, 55,…
+## $ gender        &lt;chr&gt; &quot;male&quot;, &quot;female&quot;, &quot;female&quot;, &quot;male&quot;, &quot;female&quot;, &quot;female&quot;,…
+## $ sysBP         &lt;dbl&gt; 110, 140, 130, 150, 100, 120, 130, 130, 110, 110, 120, …
+## $ diaBP         &lt;dbl&gt; 80, 90, 70, 100, 60, 80, 80, 90, 70, 60, 80, 80, 80, 70…
+## $ cholesterol   &lt;dbl&gt; 1, 3, 3, 1, 1, 2, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+## $ gluc          &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1…
+## $ currentSmoker &lt;chr&gt; &quot;nonsmoker&quot;, &quot;nonsmoker&quot;, &quot;nonsmoker&quot;, &quot;nonsmoker&quot;, &quot;no…
+## $ alco          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0…
+## $ active        &lt;dbl&gt; 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0…
+## $ cardio        &lt;dbl&gt; 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0…
+## $ BMI           &lt;dbl&gt; 21.96712, 34.92768, 23.50781, 28.71048, 23.01118, 29.38…</code></pre>
+<pre class="r"><code>glimpse(data1)</code></pre>
+<pre><code>## Observations: 4,240
+## Variables: 16
+## $ gender          &lt;chr&gt; &quot;male&quot;, &quot;female&quot;, &quot;male&quot;, &quot;female&quot;, &quot;female&quot;, &quot;female…
+## $ age             &lt;dbl&gt; 39, 46, 48, 61, 46, 43, 63, 45, 52, 43, 50, 43, 46, 4…
+## $ education       &lt;dbl&gt; 4, 2, 1, 3, 3, 2, 1, 2, 1, 1, 1, 2, 1, 3, 2, 2, 3, 2,…
+## $ currentSmoker   &lt;chr&gt; &quot;nonsmoker&quot;, &quot;nonsmoker&quot;, &quot;smoker&quot;, &quot;smoker&quot;, &quot;smoker…
+## $ cigsPerDay      &lt;dbl&gt; 0, 0, 20, 30, 23, 0, 0, 20, 0, 30, 0, 0, 15, 0, 9, 20…
+## $ BPMeds          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,…
+## $ prevalentStroke &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ prevalentHyp    &lt;dbl&gt; 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0,…
+## $ diabetes        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ diaBP           &lt;dbl&gt; 70.0, 81.0, 80.0, 95.0, 84.0, 110.0, 71.0, 71.0, 89.0…
+## $ BMI             &lt;dbl&gt; 26.97, 28.73, 25.34, 28.58, 23.10, 30.30, 33.11, 21.6…
+## $ heartRate       &lt;dbl&gt; 80, 95, 75, 65, 85, 77, 60, 79, 76, 93, 75, 72, 98, 6…
+## $ glucose         &lt;dbl&gt; 77, 76, 70, 103, 85, 99, 85, 78, 79, 88, 76, 61, 64, …
+## $ TenYearCHD      &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1,…
+## $ totChol         &lt;chr&gt; &quot;195&quot;, &quot;250&quot;, &quot;245&quot;, &quot;225&quot;, &quot;285&quot;, &quot;228&quot;, &quot;205&quot;, &quot;313…
+## $ sysBP           &lt;dbl&gt; 106.0, 121.0, 127.5, 150.0, 130.0, 180.0, 138.0, 100.…</code></pre>
+<pre class="r"><code>data2 &lt;- subset(data2, select = -c(id, cholesterol, gluc, alco, 
+    active, cardio))
+data1 &lt;- subset(data1, select = -c(TenYearCHD))
+glimpse(data2)</code></pre>
+<pre><code>## Observations: 70,000
+## Variables: 6
+## $ age           &lt;dbl&gt; 51, 56, 52, 49, 49, 61, 61, 63, 49, 55, 63, 52, 41, 55,…
+## $ gender        &lt;chr&gt; &quot;male&quot;, &quot;female&quot;, &quot;female&quot;, &quot;male&quot;, &quot;female&quot;, &quot;female&quot;,…
+## $ sysBP         &lt;dbl&gt; 110, 140, 130, 150, 100, 120, 130, 130, 110, 110, 120, …
+## $ diaBP         &lt;dbl&gt; 80, 90, 70, 100, 60, 80, 80, 90, 70, 60, 80, 80, 80, 70…
+## $ currentSmoker &lt;chr&gt; &quot;nonsmoker&quot;, &quot;nonsmoker&quot;, &quot;nonsmoker&quot;, &quot;nonsmoker&quot;, &quot;no…
+## $ BMI           &lt;dbl&gt; 21.96712, 34.92768, 23.50781, 28.71048, 23.01118, 29.38…</code></pre>
+<pre class="r"><code>glimpse(data1)</code></pre>
+<pre><code>## Observations: 4,240
+## Variables: 15
+## $ gender          &lt;chr&gt; &quot;male&quot;, &quot;female&quot;, &quot;male&quot;, &quot;female&quot;, &quot;female&quot;, &quot;female…
+## $ age             &lt;dbl&gt; 39, 46, 48, 61, 46, 43, 63, 45, 52, 43, 50, 43, 46, 4…
+## $ education       &lt;dbl&gt; 4, 2, 1, 3, 3, 2, 1, 2, 1, 1, 1, 2, 1, 3, 2, 2, 3, 2,…
+## $ currentSmoker   &lt;chr&gt; &quot;nonsmoker&quot;, &quot;nonsmoker&quot;, &quot;smoker&quot;, &quot;smoker&quot;, &quot;smoker…
+## $ cigsPerDay      &lt;dbl&gt; 0, 0, 20, 30, 23, 0, 0, 20, 0, 30, 0, 0, 15, 0, 9, 20…
+## $ BPMeds          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,…
+## $ prevalentStroke &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ prevalentHyp    &lt;dbl&gt; 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0,…
+## $ diabetes        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ diaBP           &lt;dbl&gt; 70.0, 81.0, 80.0, 95.0, 84.0, 110.0, 71.0, 71.0, 89.0…
+## $ BMI             &lt;dbl&gt; 26.97, 28.73, 25.34, 28.58, 23.10, 30.30, 33.11, 21.6…
+## $ heartRate       &lt;dbl&gt; 80, 95, 75, 65, 85, 77, 60, 79, 76, 93, 75, 72, 98, 6…
+## $ glucose         &lt;dbl&gt; 77, 76, 70, 103, 85, 99, 85, 78, 79, 88, 76, 61, 64, …
+## $ totChol         &lt;chr&gt; &quot;195&quot;, &quot;250&quot;, &quot;245&quot;, &quot;225&quot;, &quot;285&quot;, &quot;228&quot;, &quot;205&quot;, &quot;313…
+## $ sysBP           &lt;dbl&gt; 106.0, 121.0, 127.5, 150.0, 130.0, 180.0, 138.0, 100.…</code></pre>
+<pre class="r"><code>full &lt;- full_join(data1, data2)
+full &lt;- subset(full, select = -c(cigsPerDay, BPMeds, prevalentStroke, 
+    prevalentHyp, education))
+glimpse(full)</code></pre>
+<pre><code>## Observations: 74,240
+## Variables: 10
+## $ gender        &lt;chr&gt; &quot;male&quot;, &quot;female&quot;, &quot;male&quot;, &quot;female&quot;, &quot;female&quot;, &quot;female&quot;,…
+## $ age           &lt;dbl&gt; 39, 46, 48, 61, 46, 43, 63, 45, 52, 43, 50, 43, 46, 41,…
+## $ currentSmoker &lt;chr&gt; &quot;nonsmoker&quot;, &quot;nonsmoker&quot;, &quot;smoker&quot;, &quot;smoker&quot;, &quot;smoker&quot;,…
+## $ diabetes      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ diaBP         &lt;dbl&gt; 70.0, 81.0, 80.0, 95.0, 84.0, 110.0, 71.0, 71.0, 89.0, …
+## $ BMI           &lt;dbl&gt; 26.97, 28.73, 25.34, 28.58, 23.10, 30.30, 33.11, 21.68,…
+## $ heartRate     &lt;dbl&gt; 80, 95, 75, 65, 85, 77, 60, 79, 76, 93, 75, 72, 98, 65,…
+## $ glucose       &lt;dbl&gt; 77, 76, 70, 103, 85, 99, 85, 78, 79, 88, 76, 61, 64, 84…
+## $ totChol       &lt;chr&gt; &quot;195&quot;, &quot;250&quot;, &quot;245&quot;, &quot;225&quot;, &quot;285&quot;, &quot;228&quot;, &quot;205&quot;, &quot;313&quot;,…
+## $ sysBP         &lt;dbl&gt; 106.0, 121.0, 127.5, 150.0, 130.0, 180.0, 138.0, 100.0,…</code></pre>
+<p><em>Before joining my two datasets, I made a few conversions. In data2, I adjusted age and converted weight and height into BMI. Next, I adjusted column names and certain data to match with one another in both datasets. Before joining, I dropped columns providing information that I was not interested in for this project. Full_join was finally used to join both data1 and data2.</em></p>
+</div>
+<div id="wrangling" class="section level5">
+<h5>3. Wrangling</h5>
+<pre class="r"><code>full %&gt;% summarize(mean_age = mean(age, na.rm = T))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   mean_age
+##      &lt;dbl&gt;
+## 1     53.8</code></pre>
+<pre class="r"><code>full %&gt;% group_by(age) %&gt;% summarize(mean_BMI = mean(BMI, na.rm = T), 
+    sd_BMI = sd(BMI, na.rm = T))</code></pre>
+<pre><code>## # A tibble: 40 x 3
+##      age mean_BMI sd_BMI
+##    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
+##  1    30     23.9   4.48
+##  2    32     29.8  NA   
+##  3    33     23.4   2.72
+##  4    34     23.4   2.39
+##  5    35     23.9   3.41
+##  6    36     25.2   3.79
+##  7    37     25.3   4.60
+##  8    38     25.2   3.53
+##  9    39     24.9   3.67
+## 10    40     26.4   6.45
+## # … with 30 more rows</code></pre>
+<pre class="r"><code>full %&gt;% group_by(gender) %&gt;% summarize(count = n())</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   gender count
+##   &lt;chr&gt;  &lt;int&gt;
+## 1 female 47950
+## 2 male   26290</code></pre>
+<pre class="r"><code>full %&gt;% summarize_all(n_distinct)</code></pre>
+<pre><code>## # A tibble: 1 x 10
+##   gender   age currentSmoker diabetes diaBP   BMI heartRate glucose totChol
+##    &lt;int&gt; &lt;int&gt;         &lt;int&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt;     &lt;int&gt;   &lt;int&gt;   &lt;int&gt;
+## 1      2    40             2        3   230  5171        74     144     250
+## # … with 1 more variable: sysBP &lt;int&gt;</code></pre>
+<pre class="r"><code>full %&gt;% summarize_all(function(x) sum(is.na(x)))</code></pre>
+<pre><code>## # A tibble: 1 x 10
+##   gender   age currentSmoker diabetes diaBP   BMI heartRate glucose totChol
+##    &lt;int&gt; &lt;int&gt;         &lt;int&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt;     &lt;int&gt;   &lt;int&gt;   &lt;int&gt;
+## 1      0     0             0    70000     0    19     70001   70388   70000
+## # … with 1 more variable: sysBP &lt;int&gt;</code></pre>
+<pre class="r"><code>full %&gt;% summarize_at(c(&quot;age&quot;, &quot;diaBP&quot;, &quot;sysBP&quot;), mean, na.rm = T)</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##     age diaBP sysBP
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  53.8  95.8  129.</code></pre>
+<pre class="r"><code>full %&gt;% select(-diabetes, -heartRate, -glucose, -totChol) %&gt;% 
+    group_by(age) %&gt;% summarize_if(is.numeric, mean, na.rm = T)</code></pre>
+<pre><code>## # A tibble: 40 x 4
+##      age diaBP   BMI sysBP
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1    30  72.5  23.9  112.
+##  2    32  70    29.8  111 
+##  3    33  78.4  23.4  124.
+##  4    34  72.3  23.4  112.
+##  5    35  75.6  23.9  118.
+##  6    36  77.5  25.2  120.
+##  7    37  77.4  25.3  119.
+##  8    38  78.2  25.2  120.
+##  9    39  79.5  24.9  122.
+## 10    40  89.2  26.4  120.
+## # … with 30 more rows</code></pre>
+<pre class="r"><code>full %&gt;% filter(age == 30) %&gt;% summarize_if(is.numeric, mean, 
+    na.rm = T)</code></pre>
+<pre><code>## # A tibble: 1 x 7
+##     age diabetes diaBP   BMI heartRate glucose sysBP
+##   &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+## 1    30      NaN  72.5  23.9       NaN     NaN  112.</code></pre>
+<pre class="r"><code>full %&gt;% mutate(relative_age = case_when(age &gt; 54 ~ &quot;older&quot;, 
+    age == 54 ~ &quot;mean_age&quot;, age &lt; 54 ~ &quot;younger&quot;))</code></pre>
+<pre><code>## # A tibble: 74,240 x 11
+##    gender   age currentSmoker diabetes diaBP   BMI heartRate glucose totChol
+##    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;  
+##  1 male      39 nonsmoker            0    70  27.0        80      77 195    
+##  2 female    46 nonsmoker            0    81  28.7        95      76 250    
+##  3 male      48 smoker               0    80  25.3        75      70 245    
+##  4 female    61 smoker               0    95  28.6        65     103 225    
+##  5 female    46 smoker               0    84  23.1        85      85 285    
+##  6 female    43 nonsmoker            0   110  30.3        77      99 228    
+##  7 female    63 nonsmoker            0    71  33.1        60      85 205    
+##  8 female    45 smoker               0    71  21.7        79      78 313    
+##  9 male      52 nonsmoker            0    89  26.4        76      79 260    
+## 10 male      43 smoker               0   107  23.6        93      88 225    
+## # … with 74,230 more rows, and 2 more variables: sysBP &lt;dbl&gt;,
+## #   relative_age &lt;chr&gt;</code></pre>
+<pre class="r"><code>full %&gt;% group_by(age) %&gt;% summarize(mean_sysBP = mean(sysBP, 
+    na.rm = T), sd_sysBP = sd(sysBP, na.rm = T), n = n(), se_sysBP = (sd_sysBP/sqrt(n)))</code></pre>
+<pre><code>## # A tibble: 40 x 5
+##      age mean_sysBP sd_sysBP     n se_sysBP
+##    &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;
+##  1    30       112.     9.57     4    4.79 
+##  2    32       111     NA        1   NA    
+##  3    33       124.    14.1      5    6.31 
+##  4    34       112.     9.40    18    2.21 
+##  5    35       118.    17.4     42    2.69 
+##  6    36       120.    13.9     84    1.52 
+##  7    37       119.    13.4     92    1.40 
+##  8    38       120.    13.5    144    1.13 
+##  9    39       122.    16.3    170    1.25 
+## 10    40       120.    24.5   1777    0.582
+## # … with 30 more rows</code></pre>
+<pre class="r"><code>full %&gt;% arrange(BMI)</code></pre>
+<pre><code>## # A tibble: 74,240 x 10
+##    gender   age currentSmoker diabetes diaBP   BMI heartRate glucose totChol
+##    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;  
+##  1 male      60 nonsmoker           NA    90  3.47        NA      NA &lt;NA&gt;   
+##  2 male      52 nonsmoker           NA  1100  3.67        NA      NA &lt;NA&gt;   
+##  3 male      57 smoker              NA    80  7.02        NA      NA &lt;NA&gt;   
+##  4 female    61 nonsmoker           NA    80  8.00        NA      NA &lt;NA&gt;   
+##  5 female    65 nonsmoker           NA    80  9.33        NA      NA &lt;NA&gt;   
+##  6 female    52 nonsmoker           NA    70  9.92        NA      NA &lt;NA&gt;   
+##  7 male      48 nonsmoker           NA    90 10.7         NA      NA &lt;NA&gt;   
+##  8 female    50 nonsmoker           NA    80 11.7         NA      NA &lt;NA&gt;   
+##  9 female    63 nonsmoker           NA    90 12.3         NA      NA &lt;NA&gt;   
+## 10 female    61 nonsmoker           NA    70 12.9         NA      NA &lt;NA&gt;   
+## # … with 74,230 more rows, and 1 more variable: sysBP &lt;dbl&gt;</code></pre>
+<p><em>This third section of the project involved the exploration of all 6 core dplyr functions to generate summary statistics. Filter() was used to choose rows where certain conditions were true, and arrange() was used to sort the data by values in rows. Select() was used to choose a subset of variables, while mutate() was used to actually create brand new columns. Lastly, summarize() was essential in calculating summary statistics, and group_by() was used to designate groups of data.</em></p>
+</div>
+<div id="visualizing" class="section level5">
+<h5>4. Visualizing</h5>
+<pre class="r"><code>plot1 &lt;- ggplot(full, aes(sysBP)) + geom_bar(aes(y = heartRate, 
+    fill = sysBP), stat = &quot;summary&quot;, fun.y = &quot;mean&quot;) + theme(axis.text.x = element_text(angle = 45, 
+    hjust = 1))
+
+plot1 &lt;- plot1 + ggtitle(&quot;Systolic Blood Pressure vs. Heart Rate&quot;) + 
+    ylab(&quot;Heart Rate&quot;) + xlab(&quot;Systolic Blood Pressure&quot;)
+
+plot1</code></pre>
+<pre><code>## Warning: Removed 70001 rows containing non-finite values (stat_summary).</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-5-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot2 &lt;- ggplot(full, aes(diabetes)) + geom_bar(aes(y = sysBP, 
+    fill = diabetes), stat = &quot;summary&quot;, fun.y = &quot;mean&quot;) + theme(axis.text.x = element_text(angle = 45, 
+    hjust = 1))
+
+plot2 &lt;- plot2 + ggtitle(&quot;Systolic Blood Pressure vs. Diabetes&quot;) + 
+    ylab(&quot;Systolic Blood Pressure&quot;) + xlab(&quot;Diabetes&quot;)
+
+plot2</code></pre>
+<pre><code>## Warning: Removed 70000 rows containing non-finite values (stat_summary).</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-5-2.png" width="768" style="display: block; margin: auto;" /></p>
+<p><em>Plot1 uses stat=“summary” and fun.y=“mean” in order to plot the mean heart rate on the y-axis. Plot2 uses the same function in order to plot the mean systolic blood pressure on the y-axis. Plot1 indicates the slight increase of systolic blood pressure with the increase in heart rate, while Plot2 indicates the increase in having diabetes with the increase in systolic blood pressure.</em></p>
+</div>
+<div id="dimensionality-reduction" class="section level5">
+<h5>5. Dimensionality Reduction</h5>
+<pre class="r"><code>library(cluster)</code></pre>
+<p><em>When attempting to perform k-means clustering, it gives the error stating that no more than 65536 observations are allowed for this action. When increasing the cluster number to 4, the same error message is presented. The error will not allow me to place this code above.</em></p>
+</div>
+</div>

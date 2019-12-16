@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Project 3</title>
+    <link>/</link>
+    <description>Recent content on Project 3</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Sun, 02 Oct 2016 22:55:05 -0400</lastBuildDate>
+    
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Sun, 02 Oct 2016 22:55:05 -0400</pubDate>
+      
+      <guid>/projects/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Python Basics</title>
+      <link>/blog/2015-07-23-r-rmarkdown/</link>
+      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
+      
+      <guid>/blog/2015-07-23-r-rmarkdown/</guid>
+      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
+You can embed an R code chunk like this:
+summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
+    </item>
+    
+    <item>
+      <title>Project 1: Exploratory Data Analysis</title>
+      <link>/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project1/</guid>
+      <description>library(readr) data1 &amp;lt;- read_csv(&amp;quot;framingham.csv&amp;quot;) library(readr) data2 &amp;lt;- read_delim(&amp;quot;cardio_train.csv&amp;quot;, &amp;quot;;&amp;quot;, escape_double = FALSE, trim_ws = TRUE) library(dplyr) library(ggplot2) library(formatR) library(tidyverse) Sabrina Strausser sas6824 0. Introduction Since I am interested in going into the medical field, I wanted to work with some datasets related to health. I chose my two datasets because both study the effects of smoking, BMI, gender, and age on blood pressure. The shared variables between the two datasets include smoking, BMI, age, gender, and blood pressure, while the unshared variables include total cholesterol, glucose, diabetes, and heart rate.</description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling</title>
+      <link>/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project2/</guid>
+      <description>library(readr) data1 &amp;lt;- read_csv(&amp;quot;framingham.csv&amp;quot;) library(readr) data2 &amp;lt;- read_delim(&amp;quot;cardio_train.csv&amp;quot;, &amp;quot;;&amp;quot;, escape_double = FALSE, trim_ws = TRUE) library(dplyr) library(ggplot2) library(formatR) library(tidyverse) library(mvtnorm) library(lmtest) library(sandwich) Sabrina Strausser sas6824 0. For this project, I wanted to use my dataset from my first project, which presents data on diabetic and nondiabetic individuals. For each person, their age, BMI, gender, total cholesterol (“totChol”), heart rate (“heartRate”), whether they are a smoker or not (“currentSmoker”), glucose level (“glucose”), diabetic state (“diabetes”), systolic blood pressure (“sysBP”), and diastolic blood pressure (“diaBP”) has been recorded.</description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/</guid>
+      <description>  Project 1 Project 2  </description>
+    </item>
+    
+  </channel>
+</rss>
