@@ -1,0 +1,139 @@
+---
+title: 'Project 1: Exploratory Data Analysis'
+author: "SDS348 Fall 2019"
+date: "10/20/2019"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r global_options, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.align="center", fig.height=5, message=FALSE, fig.width=8,tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
+
+```{R}
+library(readr)
+data1 <- read_csv("framingham.csv")
+library(readr)
+data2 <- read_delim("cardio_train.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+library(dplyr)
+library(ggplot2)
+library(formatR)
+library(tidyverse)
+```
+
+## Sabrina Strausser sas6824
+
+---
+
+##### 0. Introduction
+
+*Since I am interested in going into the medical field, I wanted to work with some datasets related to health. I chose my two datasets because both study the effects of smoking, BMI, gender, and age on blood pressure. The shared variables between the two datasets include smoking, BMI, age, gender, and blood pressure, while the unshared variables include total cholesterol, glucose, diabetes, and heart rate. I was able to find these two datasets on the Kaggle website suggested by Dr. Woodward, and I believe that the ggplots produced in this project will provide a strong correlation between smoking and heart disease.*
+
+##### 1. Tidying
+
+```{R}
+data1 <- data1 %>% pivot_wider(names_from="totChol", values_from="sysBP")
+data1 <- data1%>%pivot_longer(cols=c(15:263),names_to = "totChol", values_to="sysBP", values_drop_na=T)
+data2 <- data2 %>% pivot_wider(names_from="height", values_from="weight")
+data2 <- data2%>%pivot_longer(cols=c(12:120),names_to = "height", values_to="weight", values_drop_na=T)
+```
+
+*Because my datasets were already tidy, I had to use pivot_wider on both of my datasets to make them untidy. This action gave my datasets more columns instead of more rows. Next, to make the datasets tidy again, I used pivot_longer to create less columns and more rows.*
+
+##### 2. Joining/Merging
+
+```{R}
+glimpse(data2)
+glimpse(data1)
+data2$age <- as.numeric(as.character(data2$age)) / 360
+data2$age<-round(data2$age)
+data2$height <- as.numeric(as.character(data2$height)) * 0.01
+data2 <- data2 %>% mutate(BMI = weight/((height)^2))
+data2 <- subset(data2, select = -c(height, weight))
+data2$gender[data2$gender==2] <- "male"
+data2$gender[data2$gender==1] <- "female"
+colnames(data1)[colnames(data1)=="male"] <- "gender"
+data1$gender[data1$gender==1] <- "male"
+data1$gender[data1$gender==0] <- "female"
+data1$currentSmoker[data1$currentSmoker==0] <- "nonsmoker"
+data1$currentSmoker[data1$currentSmoker==1] <- "smoker"
+colnames(data2)[colnames(data2)=="smoke"] <- "currentSmoker"
+data2$currentSmoker[data2$currentSmoker==1] <- "smoker"
+data2$currentSmoker[data2$currentSmoker==0] <- "nonsmoker"
+colnames(data2)[colnames(data2)=="ap_hi"] <- "sysBP"
+colnames(data2)[colnames(data2)=="ap_lo"] <- "diaBP"
+glimpse(data2)
+glimpse(data1)
+data2 <- subset(data2, select = -c(id, cholesterol, gluc, alco, active, cardio))
+data1 <- subset(data1, select = -c(TenYearCHD))
+glimpse(data2)
+glimpse(data1)
+full <- full_join(data1, data2)
+full <- subset(full, select = -c(cigsPerDay, BPMeds, prevalentStroke, prevalentHyp, education))
+glimpse(full)
+```
+
+*Before joining my two datasets, I made a few conversions. In data2, I adjusted age and converted weight and height into BMI. Next, I adjusted column names and certain data to match with one another in both datasets. Before joining, I dropped columns providing information that I was not interested in for this project. Full_join was finally used to join both data1 and data2.*
+
+##### 3. Wrangling
+
+```{R}
+
+full %>% summarize(mean_age=mean(age, na.rm=T))
+
+full %>% group_by(age) %>% summarize(mean_BMI = mean(BMI,na.rm = T), sd_BMI = sd(BMI, na.rm = T))
+
+full %>% group_by(gender) %>% summarize(count=n())
+
+full %>% summarize_all(n_distinct)
+
+full %>% summarize_all(function(x)sum(is.na(x)))
+
+full %>% summarize_at(c("age","diaBP", "sysBP"), mean, na.rm=T)
+
+full %>% select(-diabetes,-heartRate,-glucose,-totChol)%>% group_by(age)%>%summarize_if(is.numeric, mean, na.rm=T)
+
+full %>% filter(age==30) %>% summarize_if(is.numeric, mean, na.rm=T)
+
+full %>% mutate(relative_age = case_when(age>54 ~ "older", age==54 ~ "mean_age", age<54 ~ "younger"))
+
+full %>% group_by(age) %>% summarize(mean_sysBP = mean(sysBP, na.rm=T), sd_sysBP = sd(sysBP, na.rm=T), n=n(), se_sysBP = (sd_sysBP/sqrt(n)))
+
+full %>% arrange(BMI)
+```
+
+*This third section of the project involved the exploration of all 6 core dplyr functions to generate summary statistics. Filter() was used to choose rows where certain conditions were true, and arrange() was used to sort the data by values in rows. Select() was used to choose a subset of variables, while mutate() was used to actually create brand new columns. Lastly, summarize() was essential in calculating summary statistics, and group_by() was used to designate groups of data.*
+
+##### 4. Visualizing
+
+```{R}
+plot1 <- ggplot(full, aes(sysBP))+ geom_bar(aes(y=heartRate,fill=sysBP), stat="summary", fun.y="mean")+ theme(axis.text.x = element_text(angle=45, hjust=1))
+
+plot1<- plot1 + ggtitle("Systolic Blood Pressure vs. Heart Rate") + ylab("Heart Rate") + xlab("Systolic Blood Pressure")
+
+plot1
+
+plot2 <- ggplot(full, aes(diabetes))+ geom_bar(aes(y=sysBP,fill=diabetes), stat="summary", fun.y="mean")+ theme(axis.text.x = element_text(angle=45, hjust=1))
+
+plot2 <- plot2 + ggtitle("Systolic Blood Pressure vs. Diabetes") + ylab("Systolic Blood Pressure") + xlab("Diabetes")
+
+plot2
+```
+
+*Plot1 uses stat="summary" and fun.y="mean" in order to plot the mean heart rate on the y-axis. Plot2 uses the same function in order to plot the mean systolic blood pressure on the y-axis. Plot1 indicates the slight increase of systolic blood pressure with the increase in heart rate, while Plot2 indicates the increase in having diabetes with the increase in systolic blood pressure.*
+
+##### 5. Dimensionality Reduction
+
+```{R}
+library(cluster)
+```
+
+*When attempting to perform k-means clustering, it gives the error stating that no more than 65536 observations are allowed for this action. When increasing the cluster number to 4, the same error message is presented. The error will not allow me to place this code above.*
